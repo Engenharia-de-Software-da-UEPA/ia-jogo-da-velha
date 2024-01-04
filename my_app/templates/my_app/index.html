@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Véia</title>
+
+    <style>
+        #board {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 400px;
+            height: 400px;
+            background-color: #F2F2F2;
+            margin: auto;
+            margin-top: 200px;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #000;
+            background-color: #FFF;
+            cursor: pointer;
+            margin: 1px;
+
+            display: flex;
+            align-items: center;
+            justify-self: center;
+        }
+
+        .cell p {
+            font-size: 40pt;
+            font-weight: 400;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="csrf_token">
+        {% csrf_token %}
+    </div>
+    <h1 id="acabou"></h1>
+    <div id="board">
+        <div class="row" id="row_0">
+            <div class="cell col_0" data-value="EMPTY"><p></p></div>
+            <div class="cell col_1" data-value="EMPTY"><p></p></div>
+            <div class="cell col_2" data-value="EMPTY"><p></p></div>
+        </div>
+        <div class="row" id="row_1">
+            <div class="cell col_0" data-value="EMPTY"><p></p></div>
+            <div class="cell col_1" data-value="EMPTY"><p></p></div>
+            <div class="cell col_2" data-value="EMPTY"><p></p></div>
+        </div>
+        <div class="row" id="row_2">
+            <div class="cell col_0" data-value="EMPTY"><p></p></div>
+            <div class="cell col_1" data-value="EMPTY"><p></p></div>
+            <div class="cell col_2" data-value="EMPTY"><p></p></div>
+        </div>
+    </div>
+
+    <script>
+        function fetchToIA(boardSet) {
+            console.log('buscando')
+            fetch('/ia', {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector('#csrf_token input').value
+                },
+                body: JSON.stringify({'board': boardSet})
+            })
+            .then(response => response.json())
+            .then(value => {
+                if (value.resultado == "acabou") {
+                    document.getElementById('acabou').innerHTML = 'acabou';
+                    return false;
+                }
+                document.querySelector(`#board #row_${value.row} .col_${value.col}`).innerHTML = '<p>X</p>'
+                document.querySelector(`#board #row_${value.row} .col_${value.col}`).dataset.value = 'X'
+            });
+        };
+
+        const board = document.querySelector('#board');
+        const cells = document.querySelectorAll('.cell');
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', () => {
+                if (cell.dataset.value != "EMPTY") return false;
+                cell.dataset.value = 'O';
+                cell.querySelector('p').innerHTML = 'O';
+
+                let boardSet = createBoardSet();
+
+                fetchToIA(boardSet);
+            });
+        });
+
+        function createBoardSet() {
+            var boardSet = new Array();
+            let rows = board.querySelectorAll('.row');
+            for (let i = 0; i < 3; i++) {
+                let rowSet = new Array();
+                rows[i].querySelectorAll('.cell').forEach(cell_value => {
+                    rowSet.push(`${cell_value.dataset.value}`)
+                });
+                boardSet.push(rowSet);
+            };
+            
+            return boardSet;
+        };
+
+        window.onload = fetchToIA(createBoardSet());
+    </script>
+</body>
+</html>
