@@ -172,14 +172,14 @@ def minimizing(board, received_parent=None):
         # print('\n')
         actions_values.append((node.action, v))
 
-    print('jogdas possiveis no minimizing', actions_values)
+    # print('jogdas possiveis no minimizing', actions_values)
     for value in actions_values:
-        print(return_v, value[1], value[0], value[1] < return_v, move_value)
+        # print(return_v, value[1], value[0], value[1] < return_v, move_value)
         if value[1] < return_v:
             return_v = value[1]
             move_value = value[0]
 
-    print('melhor jogada do O', move_value)
+    # print('melhor jogada do O', move_value)
     if received_parent == None: 
         return move_value
     
@@ -251,6 +251,12 @@ def minimax(board):
         move_value = first_move[random.randint(0, 4)]
         return move_value
 
+    if len(possible_actions) == 8:
+        if first_board == [[X, EMPTY, EMPTY], [EMPTY, EMPTY, EMPTY], [EMPTY, EMPTY,EMPTY]]: return (1, 1)
+        elif first_board == [[EMPTY, EMPTY, X], [EMPTY, EMPTY, EMPTY], [EMPTY, EMPTY,EMPTY]]: return (1, 1)
+        elif first_board == [[EMPTY, EMPTY, EMPTY], [EMPTY, EMPTY, EMPTY], [X, EMPTY,EMPTY]]: return (1, 1)
+        elif first_board == [[EMPTY, EMPTY, EMPTY], [EMPTY, EMPTY, EMPTY], [EMPTY, EMPTY,X]]: return (1, 1)
+
     for action in possible_actions: initial_frontier.add(Node(action=action, parent=None))
 
     for node in initial_frontier.frontier:
@@ -269,7 +275,7 @@ def minimax(board):
         # actions_cost = []
 
         max = maximizing(copy.deepcopy(first_board))
-        print('final => ', max)
+        # print('final => ', max)
         move_value = max
 
         # for node in initial_frontier.frontier:
@@ -290,7 +296,7 @@ def minimax(board):
         # actions_cost = []
 
         min = minimizing(copy.deepcopy(board))
-        print('final => ', min)
+        # print('final => ', min)
         move_value = min
 
         # for node in initial_frontier.frontier:

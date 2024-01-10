@@ -15,7 +15,7 @@ def action_move(request):
             if row[i] == "EMPTY": row[i] = None
 
     move = str(ttt.minimax(board))
-    print(move)
+    # print(move)
     if move in f"None {None}": return JsonResponse({'resultado': 'acabou'})
 
     row, col = move.replace('(', '').replace(')', '').split(', ')
