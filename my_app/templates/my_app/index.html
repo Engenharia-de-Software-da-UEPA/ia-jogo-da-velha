@@ -44,11 +44,16 @@
     </style>
 </head>
 <body>
+    <input hidden type="text" id="player_value" value="None">
+
+    <button id="comecarX" onclick="comecar('X')">X</button>
+    <button id="comecarO" onclick="comecar('O')">O</button>
+
     <div id="csrf_token">
         {% csrf_token %}
     </div>
     <h1 id="acabou"></h1>
-    <div id="board">
+    <div id="board" style="display: none;">
         <div class="row" id="row_0">
             <div class="cell col_0" data-value="EMPTY"><p></p></div>
             <div class="cell col_1" data-value="EMPTY"><p></p></div>
@@ -82,25 +87,39 @@
                     document.getElementById('acabou').innerHTML = 'acabou';
                     return false;
                 }
-                document.querySelector(`#board #row_${value.row} .col_${value.col}`).innerHTML = '<p>X</p>'
-                document.querySelector(`#board #row_${value.row} .col_${value.col}`).dataset.value = 'X'
+                if (document.getElementById("player_value").value == "X") {
+                    document.querySelector(`#board #row_${value.row} .col_${value.col}`).dataset.value = 'O';
+                    document.querySelector(`#board #row_${value.row} .col_${value.col}`).innerHTML = '<p>O</p>';
+                } else {
+                    document.querySelector(`#board #row_${value.row} .col_${value.col}`).dataset.value = 'X';
+                    document.querySelector(`#board #row_${value.row} .col_${value.col}`).innerHTML = '<p>X</p>';
+                }
             });
         };
 
         const board = document.querySelector('#board');
         const cells = document.querySelectorAll('.cell');
 
-        cells.forEach(cell => {
+        function fillCells(player_value) {
+            let boardSet = createBoardSet();
+
+            if (player_value == "O") {
+                fetchToIA(boardSet);
+            }
+
+            cells.forEach(cell => {
             cell.addEventListener('click', () => {
                 if (cell.dataset.value != "EMPTY") return false;
-                cell.dataset.value = 'O';
-                cell.querySelector('p').innerHTML = 'O';
+                cell.dataset.value = player_value;
+                cell.querySelector('p').innerHTML = player_value;
 
                 let boardSet = createBoardSet();
 
                 fetchToIA(boardSet);
             });
         });
+        }
+        
 
         function createBoardSet() {
             var boardSet = new Array();
@@ -116,7 +135,14 @@
             return boardSet;
         };
 
-        window.onload = fetchToIA(createBoardSet());
+        function comecar(player_value) {
+            document.getElementById("board").style.display = "flex";
+            document.getElementById("player_value").value = player_value;
+
+            fillCells(player_value);
+        }
+
+        // window.onload = fetchToIA(createBoardSet());
     </script>
 </body>
 </html>
