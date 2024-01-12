@@ -159,7 +159,8 @@
 
         async function fetchToIA(boardSet) {
             // console.log('calculando jogada...');
-            fetch('/ia', {
+            var newBoardSet;
+            await fetch('/ia', {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken()
@@ -174,8 +175,11 @@
                     ia_value = "O";
                 } 
                 document.querySelector(`#board #row_${value.row} .col_${value.col}`).dataset.value = ia_value;
-                document.querySelector(`#board #row_${value.row} .col_${value.col} p`).innerHTML = ia_value;
+                setTimeout(() => {
+                    document.querySelector(`#board #row_${value.row} .col_${value.col} p`).innerHTML = ia_value;
+                }, 300);
             });
+            return await createBoardSet();
         };
 
         const board = document.querySelector('#board');
@@ -205,17 +209,20 @@
 
                     async function move() {
                         let boardSet = createBoardSet();
+                        console.log('antes', boardSet)
 
                         if (await verifyIfItsTerminal(boardSet)) {
                             return finished();
                         } else {
-                            await setTimeout(() => {
-                                fetchToIA(boardSet);
-                                boardSet = createBoardSet();
-                            }, 500);
+                            boardSet = await fetchToIA(boardSet);
+
+                            console.log('dps', boardSet)
+                            console.log(await verifyIfItsTerminal(boardSet))
 
                             if (await verifyIfItsTerminal(boardSet)) {
-                                return finished();
+                                setTimeout(() => {
+                                    return finished();
+                                }, 300);
                             };
                         };
                     };
