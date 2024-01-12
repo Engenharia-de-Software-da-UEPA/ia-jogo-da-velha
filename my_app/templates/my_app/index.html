@@ -6,6 +6,12 @@
     <title>Jogo da Véia</title>
 
     <style>
+        .board_content {
+            width: 100vw; height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         #board {
             display: flex;
             flex-direction: column;
@@ -15,7 +21,6 @@
             height: 400px;
             background-color: #F2F2F2;
             margin: auto;
-            margin-top: 200px;
         }
 
         .row {
@@ -42,58 +47,134 @@
             margin: auto;
         }
     </style>
+
+    <style>
+        * {
+            border: none;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        .finished {
+            position: fixed;
+            top: 50px;
+            width: 500px;
+            border-radius: 10px;
+            background-color: green;
+            display: none;
+        }
+
+        #selecionar {
+            position: absolute;
+            top: 0;
+            width: 100vw; height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #F2F2F2;
+            transition: .2s;
+        }
+
+        #selecionar button {
+            width: 150px; height: 50px;
+            background-color: rgb(2, 176, 2);
+            border-radius: 10px;
+            color: #FFFFFF;
+            font-size: 21pt;
+            margin: 10px;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        #selecionar button:hover {
+            opacity: .9;
+            transform: scale(.98);
+        }
+    </style>
 </head>
 <body>
-    <input hidden type="text" id="player_value" value="None">
+    <div id="selecionar">
+        <input hidden type="text" id="player_value" value="None">
 
-    <button id="comecarX" onclick="comecar('X')">X</button>
-    <button id="comecarO" onclick="comecar('O')">O</button>
-
-    <div id="csrf_token">
-        {% csrf_token %}
+        <button id="comecarX" onclick="comecar('X')">X</button>
+        <button id="comecarO" onclick="comecar('O')">O</button>
     </div>
-    <h1 id="acabou"></h1>
-    <div id="board" style="display: none;">
-        <div class="row" id="row_0">
-            <div class="cell col_0" data-value="EMPTY"><p></p></div>
-            <div class="cell col_1" data-value="EMPTY"><p></p></div>
-            <div class="cell col_2" data-value="EMPTY"><p></p></div>
+    
+    <div class="board_content">
+        <div id="csrf_token">
+            {% csrf_token %}
         </div>
-        <div class="row" id="row_1">
-            <div class="cell col_0" data-value="EMPTY"><p></p></div>
-            <div class="cell col_1" data-value="EMPTY"><p></p></div>
-            <div class="cell col_2" data-value="EMPTY"><p></p></div>
+        <div class="finished">
+            <h1 id="acabou"></h1>
         </div>
-        <div class="row" id="row_2">
-            <div class="cell col_0" data-value="EMPTY"><p></p></div>
-            <div class="cell col_1" data-value="EMPTY"><p></p></div>
-            <div class="cell col_2" data-value="EMPTY"><p></p></div>
+        <div id="board" style="display: none;">
+            <div class="row" id="row_0">
+                <div class="cell col_0" data-value="EMPTY"><p></p></div>
+                <div class="cell col_1" data-value="EMPTY"><p></p></div>
+                <div class="cell col_2" data-value="EMPTY"><p></p></div>
+            </div>
+            <div class="row" id="row_1">
+                <div class="cell col_0" data-value="EMPTY"><p></p></div>
+                <div class="cell col_1" data-value="EMPTY"><p></p></div>
+                <div class="cell col_2" data-value="EMPTY"><p></p></div>
+            </div>
+            <div class="row" id="row_2">
+                <div class="cell col_0" data-value="EMPTY"><p></p></div>
+                <div class="cell col_1" data-value="EMPTY"><p></p></div>
+                <div class="cell col_2" data-value="EMPTY"><p></p></div>
+            </div>
         </div>
     </div>
 
     <script>
-        function fetchToIA(boardSet) {
-            console.log('buscando')
-            fetch('/ia', {
+        function finished() {
+            let finished_content = document.querySelector('.board_content .finished');
+            finished_content.style.display = "flex";
+
+            finished_content.querySelector('h1').innerHTML = "Terminou";
+        };
+
+        function getCSRFToken() {
+            var token = document.querySelector('#csrf_token input').value;
+            return token;
+        };
+
+        async function terminalBoard(boardSet) {
+            // console.log('verificando se terminou...');
+            var its_terminal = 'falta definir no terminalBoard function';
+            await fetch("/terminal", {
                 method: "POST",
                 headers: {
-                    "X-CSRFToken": document.querySelector('#csrf_token input').value
+                    "X-CSRFToken": getCSRFToken()
                 },
                 body: JSON.stringify({'board': boardSet})
             })
             .then(response => response.json())
             .then(value => {
-                if (value.resultado == "acabou") {
-                    document.getElementById('acabou').innerHTML = 'acabou';
-                    return false;
-                }
+                its_terminal = value['terminal'];
+            });
+            return its_terminal;
+        };
+
+        async function fetchToIA(boardSet) {
+            // console.log('calculando jogada...');
+            fetch('/ia', {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: JSON.stringify({'board': boardSet})
+            })
+            .then(response => response.json())
+            .then(value => {
+                let ia_value = "X";
+
                 if (document.getElementById("player_value").value == "X") {
-                    document.querySelector(`#board #row_${value.row} .col_${value.col}`).dataset.value = 'O';
-                    document.querySelector(`#board #row_${value.row} .col_${value.col}`).innerHTML = '<p>O</p>';
-                } else {
-                    document.querySelector(`#board #row_${value.row} .col_${value.col}`).dataset.value = 'X';
-                    document.querySelector(`#board #row_${value.row} .col_${value.col}`).innerHTML = '<p>X</p>';
-                }
+                    ia_value = "O";
+                } 
+                document.querySelector(`#board #row_${value.row} .col_${value.col}`).dataset.value = ia_value;
+                document.querySelector(`#board #row_${value.row} .col_${value.col} p`).innerHTML = ia_value;
             });
         };
 
@@ -108,19 +189,42 @@
             }
 
             cells.forEach(cell => {
-            cell.addEventListener('click', () => {
-                if (cell.dataset.value != "EMPTY") return false;
-                cell.dataset.value = player_value;
-                cell.querySelector('p').innerHTML = player_value;
+                cell.addEventListener('click', () => {
+                    if (cell.dataset.value != "EMPTY") return false;
+                    cell.dataset.value = player_value;
+                    cell.querySelector('p').innerHTML = player_value;
 
-                let boardSet = createBoardSet();
+                    async function verifyIfItsTerminal(boardSet) {
+                        var its_terminal = 'sem nd ainda';
+                        its_terminal = await terminalBoard(boardSet);
 
-                fetchToIA(boardSet);
+                        console.log('terminal board?', its_terminal)
+
+                        return its_terminal;
+                    };
+
+                    async function move() {
+                        let boardSet = createBoardSet();
+
+                        if (await verifyIfItsTerminal(boardSet)) {
+                            return finished();
+                        } else {
+                            await setTimeout(() => {
+                                fetchToIA(boardSet);
+                                boardSet = createBoardSet();
+                            }, 500);
+
+                            if (await verifyIfItsTerminal(boardSet)) {
+                                return finished();
+                            };
+                        };
+                    };
+
+                    move();
+                });
             });
-        });
-        }
+        };
         
-
         function createBoardSet() {
             var boardSet = new Array();
             let rows = board.querySelectorAll('.row');
@@ -135,14 +239,20 @@
             return boardSet;
         };
 
+        function byeSection(section) {
+            section.style.opacity = "0";
+            section.addEventListener("transitionend", () => {
+                section.style.display = "none";
+            });
+        };
+
         function comecar(player_value) {
+            byeSection(document.getElementById("selecionar"));
             document.getElementById("board").style.display = "flex";
             document.getElementById("player_value").value = player_value;
 
             fillCells(player_value);
-        }
-
-        // window.onload = fetchToIA(createBoardSet());
+        };
     </script>
 </body>
 </html>
