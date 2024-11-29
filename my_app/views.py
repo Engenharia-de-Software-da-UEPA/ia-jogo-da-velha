@@ -48,3 +48,4 @@ def winner_view(request):
         winner = "Empate"
 
     return JsonResponse({"winner": winner})
+

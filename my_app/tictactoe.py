@@ -64,7 +64,6 @@ def vertical(cordinates):
     return False
 
 def diagonal(cordinates):
-
     diagonal_line = False
     if (0, 0) in cordinates and (1, 1) in cordinates and (2, 2) in cordinates: diagonal_line = True
     elif (0, 2) in cordinates and (1, 1) in cordinates and (2, 0) in cordinates: diagonal_line = True
@@ -110,6 +109,7 @@ def utility(board):
     return value
 
 
+
 def maximizing(board, received_parent=None):
     return_v = -math.inf
     possible_actions = actions(board)
@@ -126,6 +126,7 @@ def maximizing(board, received_parent=None):
         actions_values.append((node.action, v))
 
     for value in actions_values:
+
         if value[1] > return_v: 
             return_v = value[1]
             move_value = value[0]
@@ -151,6 +152,7 @@ def minimizing(board, received_parent=None):
         actions_values.append((node.action, v))
 
     for value in actions_values:
+
         if value[1] < return_v:
             return_v = value[1]
             move_value = value[0]
@@ -170,10 +172,10 @@ def max_value(board, received_parent):
     
     return v
 
-
 def min_value(board, received_parent):
     if terminal(board):
         return utility(board)
+
 
     board_copy = copy.deepcopy(board)
     v = minimizing(board_copy, received_parent=received_parent)
@@ -213,7 +215,6 @@ def minimax(board):
         if terminal(result_board) and winner(result_board) ==  X: 
             move_value = node.action
             return move_value
-        
     if player(first_board) == X:
         max = maximizing(copy.deepcopy(first_board))
         move_value = max
