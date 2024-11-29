@@ -1,7 +1,3 @@
-"""
-Tic Tac Toe Player
-"""
-
 import math
 import copy
 import random
@@ -46,7 +42,6 @@ def result(board, action):
     if action[0] > 2 or action[1] > 2: raise Exception("invalid action")
 
     board_unmodified, new_board, actual_player = copy.deepcopy(board), board, player(board)
-    
     new_board[action[0]][action[1]] = actual_player
 
     return new_board, board_unmodified
@@ -115,15 +110,6 @@ def utility(board):
 
 
 
-
-
-
-
-
-
-
-
-
 def maximizing(board, received_parent=None):
     return_v = -math.inf
     possible_actions = actions(board)
@@ -135,16 +121,12 @@ def maximizing(board, received_parent=None):
         frontier.add(Node(action=action, parent=received_parent))
 
     for node in frontier.frontier:
-        # print('eu sou o "', player(board), '" e vou jogar no', node.action)
         result_board = result(copy.deepcopy(board), node.action)[0]
         v = min_value(result_board, node)
-        # print('resultado:', v)
-        # print('\n')
         actions_values.append((node.action, v))
 
-    # print('jogadas possiveis no maximizing', actions_values)
     for value in actions_values:
-        # print('value[1] > return_v', value[1] > return_v, value[1], return_v)
+
         if value[1] > return_v: 
             return_v = value[1]
             move_value = value[0]
@@ -165,72 +147,40 @@ def minimizing(board, received_parent=None):
         frontier.add(Node(action=action, parent=received_parent))
 
     for node in frontier.frontier:
-        # print('eu sou o "', player(board), '" e vou jogar no', node.action)
         result_board = result(copy.deepcopy(board), node.action)[0]
         v = max_value(result_board, node)
-        # print('resultado:', v)
-        # print('\n')
         actions_values.append((node.action, v))
 
-    # print('jogdas possiveis no minimizing', actions_values)
     for value in actions_values:
-        # print(return_v, value[1], value[0], value[1] < return_v, move_value)
+
         if value[1] < return_v:
             return_v = value[1]
             move_value = value[0]
 
-    # print('melhor jogada do O', move_value)
     if received_parent == None: 
         return move_value
     
     return return_v
 
 
-
-
 def max_value(board, received_parent):
-    # print('recebi ->', board)
     if terminal(board):
         return utility(board)
 
-    # print('ainda nao acabou e é a vez do', player(board), 'entao vou chamr o maximizing')
     board_copy = copy.deepcopy(board)
     v = maximizing(board_copy, received_parent=received_parent)
     
     return v
 
-    
-
-
-
 def min_value(board, received_parent):
-    # print('recebi ->', board)
     if terminal(board):
         return utility(board)
 
-    # print('ainda nao acabou e é a vez do', player(board), 'entao vou chamar o minimizing')
 
     board_copy = copy.deepcopy(board)
     v = minimizing(board_copy, received_parent=received_parent)
 
     return v
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def minimax(board):
@@ -265,54 +215,13 @@ def minimax(board):
         if terminal(result_board) and winner(result_board) ==  X: 
             move_value = node.action
             return move_value
-    
-
-
-
-
     if player(first_board) == X:
-        # cost = -math.inf
-        # actions_cost = []
-
         max = maximizing(copy.deepcopy(first_board))
-        # print('final => ', max)
         move_value = max
-
-        # for node in initial_frontier.frontier:
-        #     result_board = result(copy.deepcopy(first_board), node.action)[0]
-        #     print('action:', node.action, ', board:', result_board)
-        #     max = maximizing(result_board)
-        #     print("\n\n=-=-=-=-=-=-=-\nValor final:", max, "\n=-=-=-=-=-=-=-\n\n")
-
-        #     actions_cost.append([node.action, max])
-        
-        # for action_cost in actions_cost:
-        #     if action_cost[1] > cost:
-        #         cost = action_cost[1]
-        #         move_value = action_cost[0]
         
     elif player(first_board) == O:
-        # cost = math.inf
-        # actions_cost = []
 
         min = minimizing(copy.deepcopy(board))
-        # print('final => ', min)
-        move_value = min
-
-        # for node in initial_frontier.frontier:
-        #     result_board = result(copy.deepcopy(first_board), node.action)[0]
-        #     print('action:', node.action, ', board:', result_board)
-        #     min = minimizing(copy.deepcopy(first_board))
-        #     print("\n\n=-=-=-=-=-=-=-\nValor final:", min, "\n=-=-=-=-=-=-=-\n\n")
-
-        #     actions_cost.append([node.action, min])
-        
-        # for action_cost in actions_cost:
-        #     if action_cost[1] < cost: 
-        #         cost = action_cost[1]
-        #         move_value = action_cost[0]
-        
-
+        move_value = min  
     
     return move_value
-

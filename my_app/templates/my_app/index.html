@@ -3,103 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Véia</title>
+    <title>Jogo da Velha com IA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
     <style>
-        .board_content {
-            width: 100vw; height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #board {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 400px;
-            height: 400px;
-            background-color: #F2F2F2;
-            margin: auto;
-        }
+        * {font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; border: none; box-sizing: border-box; margin: 0; padding: 0;}
 
-        .row {
-            display: flex;
-            flex-direction: row;
-        }
+        body {overflow: hidden; background-color: #F2F2F2;}
 
-        .cell {
-            width: 100px;
-            height: 100px;
-            border: 1px solid #000;
-            background-color: #FFF;
-            cursor: pointer;
-            margin: 1px;
+        .board_content {width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #F2F2F2}
 
-            display: flex;
-            align-items: center;
-            justify-self: center;
+        #board {display: flex; flex-direction: column; justify-content: center; align-items: center; width: 400px; height: 400px; margin: auto;}
+        
+        @media (max-width: 700px) {
+            #board {padding-top: 100px;} 
         }
+        .row {display: flex; flex-direction: row;}
 
-        .cell p {
-            font-size: 40pt;
-            font-weight: 400;
-            margin: auto;
-        }
+        .cell {width: 100px; height: 100px; border: 1px solid #000; background-color: #F2F2F2; cursor: pointer; display: flex; align-items: center; justify-self: center;}
+
+        .cell p {font-size: 40pt; font-weight: 400; margin: auto;}
     </style>
 
     <style>
-        * {
-            border: none;
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        .finished {position: fixed; top: 50px; width: 500px; border-radius: 10px; background-color: rgb(2, 176, 2); top: -100px; display: flex; transition: .4s; color: #FFFFFF;}
+        .finished h1 {text-align: center; font-size: 18pt; font-weight: 500; margin: auto; padding: 15px;}
 
-        .finished {
-            position: fixed;
-            top: 50px;
-            width: 500px;
-            border-radius: 10px;
-            background-color: green;
-            display: none;
-        }
+        #selecionar {position: absolute; top: 0; width: 100vw; height: 100vh; display: flex; align-items: center; flex-direction: column; justify-content: center; background-color: #F2F2F2; transition: .2s;}
 
-        #selecionar {
-            position: absolute;
-            top: 0;
-            width: 100vw; height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #F2F2F2;
-            transition: .2s;
-        }
+        #selecionar .buttons {display: flex; align-items: center; justify-content: center; background-color: #F2F2F2; transition: .2s; padding-top: 40px;}
 
-        #selecionar button {
-            width: 150px; height: 50px;
-            background-color: rgb(2, 176, 2);
-            border-radius: 10px;
-            color: #FFFFFF;
-            font-size: 21pt;
-            margin: 10px;
-            cursor: pointer;
-            transition: .3s;
-        }
+        button {min-width: 150px; height: 50px; background-color: rgb(2, 176, 2); border-radius: 10px; color: #FFFFFF;font-size: 12pt; margin: 10px; cursor: pointer; transition: .3s; padding: 0 30px;}
+ 
+        button:hover {opacity: .9;transform: scale(.98);}
 
-        #selecionar button:hover {
-            opacity: .9;
-            transform: scale(.98);
-        }
+        #selecionar button {font-size: 21pt;}
     </style>
 </head>
 <body>
+    <div class="count ia">
+        <h1>IA</h1>
+        <p>0</p>
+    </div>
+
+    <div class="count player">
+        <h1>Você</h1>
+        <p>0</p>
+    </div>
+
+    <div class="count empate">
+        <h1>Empate</h1>
+        <p>0</p>
+    </div>
+
+    <style>
+        .count {position: absolute; margin: 20px; top: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; width: 100px; background-color: #f0f0f0; border-radius: 10px; color: #000; font-size: 14pt; font-weight: 600; transition: .4s;}
+        .count {box-shadow: inset 0 0 10px #000000b0; border: 1px solid rgb(170, 170, 170); color: #FFFFFF;}
+        .count h1 {font-size: 18pt; font-weight: 500; margin-bottom: 5px;}
+        .count.ia {left: 0; background-color: rgb(176, 2, 2);}
+        .count.player {right: 0; background-color: rgb(2, 176, 2);}
+        .count.empate {right: 0; top: 140px; background-color: rgb(2, 2, 176);}
+
+        @media (max-width: 700px) {
+            .count {font-size: 12pt; height: 80px; width: 100px;}
+            .count h1 {font-size: 12pt;}
+            .count.empate {top: 90px}
+        }
+    </style>
+
+
     <div id="selecionar">
         <input hidden type="text" id="player_value" value="None">
 
-        <button id="comecarX" onclick="comecar('X')">X</button>
-        <button id="comecarO" onclick="comecar('O')">O</button>
+        <h1 style="text-align: center;">Selecione X ou O</h1>
+
+        <div class="buttons">
+            <button id="comecarX" onclick="comecar('X')">X</button>
+            <button id="comecarO" onclick="comecar('O')">O</button>
+        </div>
     </div>
+
+    <div id="block" class="block"></div>
+    <style>
+        .block {position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -10;}
+        .block.top {z-index: 100;}
+    </style>
     
     <div class="board_content">
         <div id="csrf_token">
@@ -125,12 +116,113 @@
                 <div class="cell col_2" data-value="EMPTY"><p></p></div>
             </div>
         </div>
+
     </div>
 
+    <div class="options">
+        <button class="again">Jogar mais uma vez</button>
+        <!-- <button class="change">Mudar para <span>X ou O</span></button> -->
+    </div>
+
+    <style>
+        .options {display: fixed; z-index: 10000;}
+    </style>
+
     <script>
+        document.querySelector('.again').addEventListener('click', () => {
+            document.getElementById("block").classList.remove("top");
+            let cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.dataset.value = "EMPTY";
+                cell.querySelector('p').innerHTML = "";
+            });
+
+            if (document.getElementById("player_value").value == "O") {
+                fetchToIA(createBoardSet());
+            };
+
+            document.querySelector('.finished').style.top = "-100px";
+            document.querySelector('.options').style.bottom = "-150px";
+        });
+    </script>
+
+    <style>
+        .options {position: absolute; bottom: -150px; width: 100%; height: auto; display: flex; align-items: center; justify-content: center; transition: .4s;}
+    </style>
+
+    <style>
+        #row_0 .col_0 {border-top: 0; border-left: 0;}
+        #row_0 .col_1 {border-top: 0;}
+        #row_0 .col_2 {border-top: 0; border-right: 0;}
+
+        #row_1 .col_0 {border-left: 0;}
+        #row_1 .col_2 {border-right: 0;}
+
+        #row_2 .col_0 {border-bottom: 0; border-left: 0;}
+        #row_2 .col_1 {border-bottom: 0;}
+        #row_2 .col_2 {border-bottom: 0; border-right: 0;}
+    </style>
+
+    <script>
+        async function verifyIfItsTerminal(boardSet) {
+            var its_terminal = 'sem nd ainda';
+            its_terminal = await terminalBoard(boardSet);
+
+            console.log('terminal board?', its_terminal)
+
+            return its_terminal;
+        };
+
         function finished() {
+            document.getElementById("block").classList.add("top");
             let finished_content = document.querySelector('.board_content .finished');
-            finished_content.style.display = "flex";
+            finished_content.style.top = "40px"
+
+            let option = document.querySelector(".options");
+            option.style.bottom = "40px";
+
+            // fetch para verificar o winner
+            fetch("/winner", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: JSON.stringify({'board': createBoardSet()})
+            })
+            .then(response => response.json())
+            .then(data => {
+                let player_value = document.getElementById("player_value").value;
+                console.log(data);
+                if (data.winner == "X") {
+                    if (player_value == "X") {
+                        document.querySelector('.count.player p').innerHTML = parseInt(document.querySelector('.count.player p').innerHTML) + 1;
+                        finished_content.style.backgroundColor = "rgb(2, 176, 2)";
+                        finished_content.querySelector('h1').innerHTML = "Você ganhou!";
+                    } else {
+                        document.querySelector('.count.ia p').innerHTML = parseInt(document.querySelector('.count.ia p').innerHTML) + 1;
+                        finished_content.style.backgroundColor = "rgb(176, 2, 2)";
+                        finished_content.querySelector('h1').innerHTML = "A IA ganhou!";
+                    }
+                } else if (data.winner == "O") {
+                    if (player_value == "O") {
+                        document.querySelector('.count.player p').innerHTML = parseInt(document.querySelector('.count.player p').innerHTML) + 1;
+                        finished_content.style.backgroundColor = "rgb(2, 176, 2)";
+                        finished_content.querySelector('h1').innerHTML = "Você ganhou!";
+                    } else {
+                        document.querySelector('.count.ia p').innerHTML = parseInt(document.querySelector('.count.ia p').innerHTML) + 1;
+                        finished_content.style.backgroundColor = "rgb(176, 2, 2)";
+                        finished_content.querySelector('h1').innerHTML = "A IA ganhou!";
+                    }
+                } else {
+                    finished_content.querySelector('h1').innerHTML = "Empate!";
+                    finished_content.style.backgroundColor = "rgb(2, 2, 176)";
+                    document.querySelector('.count.empate p').innerHTML = parseInt(document.querySelector('.count.empate p').innerHTML) + 1;
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching winner:", error);
+            });
 
             finished_content.querySelector('h1').innerHTML = "Terminou";
         };
@@ -177,6 +269,7 @@
                 document.querySelector(`#board #row_${value.row} .col_${value.col}`).dataset.value = ia_value;
                 setTimeout(() => {
                     document.querySelector(`#board #row_${value.row} .col_${value.col} p`).innerHTML = ia_value;
+                    document.getElementById("block").classList.remove("top");
                 }, 300);
             });
             return await createBoardSet();
@@ -189,29 +282,30 @@
             let boardSet = createBoardSet();
 
             if (player_value == "O") {
+                document.getElementById("block").classList.add("top");
                 fetchToIA(boardSet);
             }
 
             cells.forEach(cell => {
                 cell.addEventListener('click', () => {
+                    // if (verifyIfItsTerminal(createBoardSet())) {
+                    //     document.getElementById("block").classList.add("top");
+                    //     return false;
+                    // };
+
                     if (cell.dataset.value != "EMPTY") return false;
                     cell.dataset.value = player_value;
                     cell.querySelector('p').innerHTML = player_value;
 
-                    async function verifyIfItsTerminal(boardSet) {
-                        var its_terminal = 'sem nd ainda';
-                        its_terminal = await terminalBoard(boardSet);
+                    document.getElementById("block").classList.add("top");
 
-                        console.log('terminal board?', its_terminal)
-
-                        return its_terminal;
-                    };
 
                     async function move() {
                         let boardSet = createBoardSet();
                         console.log('antes', boardSet)
 
                         if (await verifyIfItsTerminal(boardSet)) {
+                            document.getElementById("block").classList.add("top");
                             return finished();
                         } else {
                             boardSet = await fetchToIA(boardSet);

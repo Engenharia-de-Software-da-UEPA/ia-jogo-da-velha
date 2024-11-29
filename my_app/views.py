@@ -32,3 +32,20 @@ def terminal_view(request):
             if row[i] == "EMPTY": row[i] = None
 
     return JsonResponse({"terminal": ttt.terminal(board)})
+
+
+def winner_view(request):
+    if request.method != "POST": raise Http404
+    board = json.loads(request.body)['board']
+
+    # print(board, ttt.utility(board))
+
+    if ttt.utility(board) == 1:
+        winner = "X"
+    elif ttt.utility(board) == -1:
+        winner = "O"
+    else:
+        winner = "Empate"
+
+    return JsonResponse({"winner": winner})
+
